@@ -1,0 +1,9 @@
+@()
+
+@main("Pages") {
+<form method="post" action="@routes.PagesController.post()">
+    <label for="pages">How many pages does your book have?</label>
+    <input type="number" name="pages" id="pages" min="4"/>
+    <button type="submit">Continue</button>
+</form>
+}

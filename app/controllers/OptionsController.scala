@@ -1,8 +1,8 @@
 package controllers
 
-import javax.inject._
-import play.api._
 import play.api.mvc._
+
+import javax.inject._
 
 @Singleton
 class OptionsController @Inject()(val controllerComponents: ControllerComponents) extends BaseController {
