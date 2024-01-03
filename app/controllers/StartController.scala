@@ -1,7 +1,6 @@
 package controllers
 
 import javax.inject._
-import play.api._
 import play.api.mvc._
 
 @Singleton
@@ -10,5 +9,5 @@ class StartController @Inject()(val controllerComponents: ControllerComponents) 
     Ok(views.html.start())
   }
 
-  def post(): Action[AnyContent] = Action {Redirect(routes.)}
+  def post(): Action[AnyContent] = Action { Redirect(routes.PagesController.get()).withNewSession }
 }
