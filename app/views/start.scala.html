@@ -1,4 +1,4 @@
-@()
+@()(implicit request:RequestHeader)
 
 @main("Start") {
 <section>
@@ -7,6 +7,7 @@
     on how to create your book.
 </section>
 <form method="post" action="@routes.StartController.post()">
+    @helper.CSRF.formField
     <button type="submit">Continue</button>
 </form>
 }

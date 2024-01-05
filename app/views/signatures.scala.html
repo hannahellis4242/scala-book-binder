@@ -1,0 +1,26 @@
+@()(implicit request:RequestHeader)
+
+@main("Pages") {
+<form method="post" action="@routes.SignaturesController.post()">
+    @helper.CSRF.formField
+    <fieldset>
+        <legend>Number of sheets to use in signatures</legend>
+        <ul>
+            <li>
+                <label for="3">3</label><input type="checkbox" name="3" id="3" />
+            </li>
+            <li>
+                <label for="4">4</label> <input type="checkbox" name="4" id="4" />
+            </li>
+            <li>
+                <label for="5">5</label> <input type="checkbox" name="5" id="5" />
+            </li>
+            <li>
+                <label for="6">6</label> <input type="checkbox" name="6" id="6" />
+            </li>
+        </ul>
+        <p>You must select at least one</p>
+    </fieldset>
+    <button type="submit">Continue</button>
+</form>
+}
