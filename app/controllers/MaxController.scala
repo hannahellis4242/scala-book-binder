@@ -6,19 +6,19 @@ import javax.inject._
 
 @Singleton
 class MaxController @Inject()(val controllerComponents: ControllerComponents) extends BaseController {
-  def get: Action[AnyContent] = Action { request =>
+  def get: Action[AnyContent] = Action { implicit request =>
     request.session.get("pages")
-    .map( pages => Ok(views.html.max(pages)))
-      .getOrElse(Redirect(routes.StartController.get())).withNewSession
+      .map(pages => Ok(views.html.max(pages)))
+      .getOrElse(Redirect(routes.StartController.get()).withNewSession)
   }
 
-  def post: Action[AnyContent] = Action{ request =>
+  def post: Action[AnyContent] = Action { request =>
     request.body.asFormUrlEncoded
       .flatMap(values => {
         values.get("max")
           .flatMap(_.headOption)
           .flatMap(pages => pages.toIntOption)
-          .map(max => Redirect(routes.SignaturesController.get()).withSession(request.session + ("max",max.toString)))
+          .map(max => Redirect(routes.SignaturesController.get()).withSession(request.session + ("max", max.toString)))
       })
       .getOrElse(Redirect(routes.ErrorController.get("could not find form value max")))
   }
