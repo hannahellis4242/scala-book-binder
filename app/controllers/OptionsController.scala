@@ -27,7 +27,9 @@ class OptionsController @Inject()(ws: WSClient,
       "pageCount" -> problem.pageCount
     )
 
-  private val optionsRequest = ws.url("http://sigature_finder:8080")
+  //private val urlPod = "http://sigature_finder:8080"
+  private val urlLocal = "http://localhost:5001"
+  private val optionsRequest = ws.url(urlLocal)
 
   private def parseJsonStringAs[T](s: String)(implicit rds: Reads[T]): Option[T] =
     Json.parse(s).validate[T].asOpt
@@ -43,14 +45,22 @@ class OptionsController @Inject()(ws: WSClient,
     optionsRequest
       .addHttpHeaders("Content-Type" -> "application/json")
       .post(body)
-      .map(response => response.toString)
+      .flatMap(response => response.status match {
+        case 200 => Future.successful( response.body )
+        case 400 => Future.failed(new Exception(response.statusText))
+      })
   }
 
-  private def requestSolution(key: String): Future[JsValue] =
+  private def requestSolution(key: String): Future[JsValue] = {
+    println(s"key : $key")
     optionsRequest
       .withQueryStringParameters(("key", key))
       .get()
-      .map(response => Json.parse(response.body))
+      .flatMap(response => response.status match {
+        case 404 => Future.failed(new Exception(response.statusText))
+        case 200 => Future.successful(Json.parse(response.body))
+      })
+  }
 
   private def getResult(problem: Problem) =
     requestSolutionKey(problem)

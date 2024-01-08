@@ -11,13 +11,10 @@ services:
   sigature_finder:
     image: ghcr.io/hannahellis4242/bsfs/book-signature-finder-service:latest
     restart: always
+    expose:
+      - 5001
+    ports:
+      - 5001:8080
   signature_order:
     image: ghcr.io/hannahellis4242/bsoo/book-signature-order-options:latest
-    restart: always
-  web:
-    image: ghcr.io/hannahellis4242/sbb/scala-book-binder:latest
-    expose:
-      - 8080
-    ports:
-      - 8080:8080
     restart: always
