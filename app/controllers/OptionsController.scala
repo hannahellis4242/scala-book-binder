@@ -46,13 +46,12 @@ class OptionsController @Inject()(ws: WSClient,
       .addHttpHeaders("Content-Type" -> "application/json")
       .post(body)
       .flatMap(response => response.status match {
-        case 200 => Future.successful( response.body )
+        case 200 => Future.successful(response.body)
         case 400 => Future.failed(new Exception(response.statusText))
       })
   }
 
-  private def requestSolution(key: String): Future[JsValue] = {
-    println(s"key : $key")
+  private def requestSolution(key: String): Future[JsValue] =
     optionsRequest
       .withQueryStringParameters(("key", key))
       .get()
@@ -60,7 +59,6 @@ class OptionsController @Inject()(ws: WSClient,
         case 404 => Future.failed(new Exception(response.statusText))
         case 200 => Future.successful(Json.parse(response.body))
       })
-  }
 
   private def getResult(problem: Problem) =
     requestSolutionKey(problem)
