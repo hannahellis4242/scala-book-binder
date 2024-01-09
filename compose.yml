@@ -1,0 +1,20 @@
+version: "3"
+services:
+  redis:
+    image: redis
+    restart: always
+  page_sequence:
+    image: ghcr.io/hannahellis4242/sbpss/scala-book-page-sequence-service:latest
+    restart: always
+    environment:
+      - DB_HOST=${DB_HOST}
+  sigature_finder:
+    image: ghcr.io/hannahellis4242/bsfs/book-signature-finder-service:latest
+    restart: always
+    expose:
+      - 5001
+    ports:
+      - 5001:8080
+  signature_order:
+    image: ghcr.io/hannahellis4242/bsoo/book-signature-order-options:latest
+    restart: always

@@ -1,0 +1,26 @@
+@import model.BookOption
+@(options:Seq[BookOption])(implicit request:RequestHeader)
+
+@main("Pages") {
+<form method="post" action="@routes.OptionsController.post()">
+    @helper.CSRF.formField
+    <fieldset>
+        <legend>Options</legend>
+        <ul>
+            @options.zipWithIndex.map {case (option,i) =>
+            <li>
+                <label>
+                    <input
+                            type="radio"
+                            name="option"
+                            value="@option.toText"
+                            id="@{i+1}"
+                    />
+                    @option.toText
+                </label>
+            </li>}
+        </ul>
+    </fieldset>
+    <button type="submit">Continue</button>
+</form>
+}

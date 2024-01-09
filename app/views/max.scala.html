@@ -1,0 +1,12 @@
+@(pages:String)(implicit request:RequestHeader)
+
+@main("Pages") {
+<form method="post" action="@routes.MaxController.post()">
+    @helper.CSRF.formField
+    <label for="max">What is the maximum number of pages you will allow your book to
+        have?</label
+    >
+    <input type="number" name="max" id="max" min="@pages"/>
+    <button type="submit">Continue</button>
+</form>
+}
