@@ -1,6 +1,7 @@
 package controllers
 
-import play.api.libs.json.{JsValue, Json, Reads, Writes}
+import model.{BookOption, BookOptionsProblem}
+import play.api.libs.json.{JsValue, Json, Reads}
 import play.api.libs.ws.WSClient
 import play.api.mvc._
 
@@ -12,20 +13,6 @@ import scala.util.{Failure, Success}
 class OptionsController @Inject()(ws: WSClient,
                                   val controllerComponents: ControllerComponents)
                                  (implicit execution: ExecutionContext) extends BaseController {
-  case class Problem(minimum: Int,
-                     maximum: Int,
-                     sizes: Seq[Int],
-                     format: String,
-                     pageCount: Boolean)
-
-  implicit val problemWrites: Writes[Problem] = (problem: Problem) =>
-    Json.obj(
-      "minimum" -> problem.minimum,
-      "maximum" -> problem.maximum,
-      "sizes" -> problem.sizes,
-      "format" -> problem.format,
-      "pageCount" -> problem.pageCount
-    )
 
   //private val urlPod = "http://sigature_finder:8080"
   private val urlLocal = "http://localhost:5001"
@@ -34,22 +21,20 @@ class OptionsController @Inject()(ws: WSClient,
   private def parseJsonStringAs[T](s: String)(implicit rds: Reads[T]): Option[T] =
     Json.parse(s).validate[T].asOpt
 
-  private def createProblem(session: Session): Option[Problem] =
+  private def createBookOptionsProblem(session: Session): Option[BookOptionsProblem] =
     session.get("pages").flatMap(_.toIntOption)
       .flatMap(pages => session.get("max").flatMap(_.toIntOption).map((pages, _)))
       .flatMap(params => session.get("signatures").flatMap(parseJsonStringAs[Seq[Int]]).map((params._1, params._2, _)))
-      .map(params => Problem(minimum = params._1, maximum = params._2, sizes = params._3, format = "json", pageCount = true))
+      .map(params => BookOptionsProblem(minimum = params._1, maximum = params._2, sizes = params._3, format = "json", pageCount = true))
 
-  private def requestSolutionKey(problem: Problem) = {
-    val body = Json.toJson(problem)
+  private def requestSolutionKey(BookOptionsProblem: BookOptionsProblem) =
     optionsRequest
       .addHttpHeaders("Content-Type" -> "application/json")
-      .post(body)
+      .post(Json.toJson(BookOptionsProblem))
       .flatMap(response => response.status match {
         case 200 => Future.successful(response.body)
         case 400 => Future.failed(new Exception(response.statusText))
       })
-  }
 
   private def requestSolution(key: String): Future[JsValue] =
     optionsRequest
@@ -60,20 +45,23 @@ class OptionsController @Inject()(ws: WSClient,
         case 200 => Future.successful(Json.parse(response.body))
       })
 
-  private def getResult(problem: Problem) =
-    requestSolutionKey(problem)
+  private def getResult(BookOptionsProblem: BookOptionsProblem)(implicit request: RequestHeader) =
+    requestSolutionKey(BookOptionsProblem)
       .flatMap(requestSolution)
       .transformWith {
         case Success(value) => Future {
-          Ok(value)
+          value.validate[Seq[BookOption]]
+            .asOpt
+            .map(x => Ok(views.html.options(x)))
+            .getOrElse(Redirect(routes.ErrorController.get("Something went wrong")))
         }
         case Failure(exception) => Future {
           Redirect(routes.ErrorController.get(exception.getMessage))
         }
       }
 
-  def get(): Action[AnyContent] = Action.async { request => {
-    createProblem(request.session)
+  def get(): Action[AnyContent] = Action.async { implicit request => {
+    createBookOptionsProblem(request.session)
       .map(getResult)
       .getOrElse(Future {
         Redirect(routes.StartController.get()).withNewSession
@@ -81,5 +69,9 @@ class OptionsController @Inject()(ws: WSClient,
   }
   }
 
-  def post(): Action[AnyContent] = TODO
+  def post(): Action[AnyContent] = Action { request =>
+    request.body.asFormUrlEncoded
+      .map(Ok(_))
+      .getOrElse(Redirect(routes.ErrorController.get("Expected an option to be selected")))
+  }
 }

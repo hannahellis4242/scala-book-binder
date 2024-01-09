@@ -2,14 +2,14 @@ package model
 
 import play.api.libs.json.{Json, Writes}
 
-case class BookOptionProblem(minimum: Int,
-                   maximum: Int,
-                   sizes: Seq[Int],
-                   format: String,
-                   pageCount: Boolean)
+case class BookOptionsProblem(minimum: Int,
+                              maximum: Int,
+                              sizes: Seq[Int],
+                              format: String,
+                              pageCount: Boolean)
 
-object BookOptionProblem {
-  implicit val problemWrites: Writes[BookOptionProblem] = (problem: BookOptionProblem) =>
+object BookOptionsProblem {
+  implicit val problemWrites: Writes[BookOptionsProblem] = (problem: BookOptionsProblem) =>
     Json.obj(
       "minimum" -> problem.minimum,
       "maximum" -> problem.maximum,
