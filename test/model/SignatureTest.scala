@@ -37,4 +37,9 @@ class SignatureTest extends AnyFunSuite with Matchers{
     val signature = Signature.fromText( "4.5:6.3" )
     signature should be(None)
   }
+
+  test("can calculate the number of pages in a signature"){
+    val signature = Signature(4,2)
+    signature.pages should be(32)
+  }
 }

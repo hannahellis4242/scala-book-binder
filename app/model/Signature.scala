@@ -5,6 +5,7 @@ import play.api.libs.json.{JsPath, Reads}
 
 case class Signature(size: Int, count: Int) {
   lazy val toText = s"$size:$count"
+  lazy val pages: Int = size * count * 4
 }
 
 object Signature {

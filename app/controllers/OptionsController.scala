@@ -71,7 +71,14 @@ class OptionsController @Inject()(ws: WSClient,
 
   def post(): Action[AnyContent] = Action { request =>
     request.body.asFormUrlEncoded
-      .map(Ok(_))
+      .flatMap(_.get("option"))
+      .flatMap {
+        case Seq(s) => Some(s)
+        case _ => None
+      }
+      .flatMap(BookOption.fromText)
+      .map(_.toText)
+      .map(selected=>Redirect(routes.SequenceController.get()).withSession(request.session+("selectedOption",selected)))
       .getOrElse(Redirect(routes.ErrorController.get("Expected an option to be selected")))
   }
 }
